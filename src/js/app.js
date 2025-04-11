@@ -67,6 +67,9 @@ document.addEventListener("DOMContentLoaded", function () {
   const noiseFilterType = document.getElementById("noise-filter-type");
   const extraFilter = document.getElementById("extra-filter");
   const extraFilterValue = document.getElementById("extra-filter-value");
+  const noiseFilterType2 = document.getElementById("noise-filter-type-2"); // New
+  const extraFilter2 = document.getElementById("extra-filter-2"); // New
+  const extraFilterValue2 = document.getElementById("extra-filter-value-2"); // New
   const invertColors = document.getElementById("invert-colors");
 
   // Border elements
@@ -165,6 +168,19 @@ document.addEventListener("DOMContentLoaded", function () {
     applyFilters();
   });
 
+  // New listener for second noise filter type
+  noiseFilterType2.addEventListener("change", function () {
+    const extraFilterControl2 = document.getElementById(
+      "extra-filter-control-2"
+    );
+    if (this.value === "none") {
+      extraFilterControl2.style.display = "none";
+    } else {
+      extraFilterControl2.style.display = "flex";
+    }
+    applyFilters();
+  });
+
   // Sliders and controls
   ditheringScale.addEventListener("input", function () {
     ditheringScaleValue.textContent = this.value;
@@ -175,6 +191,12 @@ document.addEventListener("DOMContentLoaded", function () {
 
   extraFilter.addEventListener("input", function () {
     extraFilterValue.textContent = this.value;
+    applyFilters();
+  });
+
+  // New listener for second filter intensity
+  extraFilter2.addEventListener("input", function () {
+    extraFilterValue2.textContent = this.value;
     applyFilters();
   });
 
@@ -398,6 +420,9 @@ document.addEventListener("DOMContentLoaded", function () {
       noiseFilterType.value = "none";
       extraFilter.value = 0;
       extraFilterValue.textContent = "0";
+      noiseFilterType2.value = "none"; // Reset second filter
+      extraFilter2.value = 0; // Reset second filter intensity
+      extraFilterValue2.textContent = "0"; // Reset second filter value display
       invertColors.checked = false;
 
       // Reset border controls
@@ -412,11 +437,15 @@ document.addEventListener("DOMContentLoaded", function () {
       secondBorderThicknessValue.textContent = "3";
       secondBorderColor.value = "#ffffff";
 
-      // Hide extra filter control
+      // Hide extra filter controls
       const extraFilterControl = document.getElementById(
         "extra-filter-control"
       );
       extraFilterControl.style.display = "none";
+      const extraFilterControl2 = document.getElementById(
+        "extra-filter-control-2"
+      ); // Hide second control
+      extraFilterControl2.style.display = "none";
 
       // Reset zoom and pan
       zoomLevel = 1;
@@ -449,7 +478,7 @@ document.addEventListener("DOMContentLoaded", function () {
     applyHighlights(imageData.data, highlights.value);
     applyLuminanceThreshold(imageData.data, luminanceThreshold.value);
 
-    // Apply noise filters based on selected type
+    // Apply first noise filter
     const selectedNoiseFilter = noiseFilterType.value;
     const filterIntensity = parseFloat(extraFilter.value);
 
@@ -475,6 +504,37 @@ document.addEventListener("DOMContentLoaded", function () {
             imageData.width,
             imageData.height,
             filterIntensity
+          );
+          break;
+      }
+    }
+
+    // Apply second noise filter
+    const selectedNoiseFilter2 = noiseFilterType2.value;
+    const filterIntensity2 = parseFloat(extraFilter2.value);
+
+    if (filterIntensity2 > 0 && selectedNoiseFilter2 !== "none") {
+      switch (selectedNoiseFilter2) {
+        case "gaussian":
+          applyGaussianNoise(imageData.data, filterIntensity2);
+          break;
+        case "salt-pepper":
+          applySaltPepperNoise(imageData.data, filterIntensity2);
+          break;
+        case "blur":
+          applyBlur(
+            imageData.data,
+            imageData.width,
+            imageData.height,
+            filterIntensity2
+          );
+          break;
+        case "pixelate":
+          applyPixelate(
+            imageData.data,
+            imageData.width,
+            imageData.height,
+            filterIntensity2
           );
           break;
       }
@@ -604,6 +664,8 @@ document.addEventListener("DOMContentLoaded", function () {
       luminanceThreshold: luminanceThreshold.value,
       noiseFilterType: noiseFilterType.value,
       extraFilter: extraFilter.value,
+      noiseFilterType2: noiseFilterType2.value, // Save second filter type
+      extraFilter2: extraFilter2.value, // Save second filter intensity
       invertColors: invertColors.checked,
       enableBorder: enableBorder.checked,
       borderThickness: borderThickness.value,
@@ -635,6 +697,9 @@ document.addEventListener("DOMContentLoaded", function () {
     noiseFilterType.value = settings.noiseFilterType;
     extraFilter.value = settings.extraFilter;
     extraFilterValue.textContent = settings.extraFilter;
+    noiseFilterType2.value = settings.noiseFilterType2 || "none"; // Apply second filter type (default to none if not saved)
+    extraFilter2.value = settings.extraFilter2 || 0; // Apply second filter intensity
+    extraFilterValue2.textContent = settings.extraFilter2 || 0; // Update second filter value display
     invertColors.checked = settings.invertColors;
 
     enableBorder.checked = settings.enableBorder;
@@ -657,6 +722,17 @@ document.addEventListener("DOMContentLoaded", function () {
       extraFilterControl.style.display = "none";
     } else {
       extraFilterControl.style.display = "flex";
+    }
+
+    // Update visibility for second filter control
+    const extraFilterControl2 = document.getElementById(
+      "extra-filter-control-2"
+    );
+    if (settings.noiseFilterType2 === "none" || !settings.noiseFilterType2) {
+      // Check if it's none or undefined
+      extraFilterControl2.style.display = "none";
+    } else {
+      extraFilterControl2.style.display = "flex";
     }
 
     borderControls.style.display = settings.enableBorder ? "block" : "none";

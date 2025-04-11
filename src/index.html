@@ -219,7 +219,7 @@
             style="display: none"
           >
             <label>
-              Filter Intensity
+              Filter 1 Intensity
               <span id="extra-filter-value">0</span>
             </label>
             <input
@@ -231,6 +231,39 @@
               step="0.01"
             />
           </div>
+  
+          <!-- Second Noise Filter Controls -->
+          <div class="control-row">
+            <label> Noise Filter 2 </label>
+            <select id="noise-filter-type-2">
+              <option value="none">None</option>
+              <option value="gaussian">Gaussian Noise</option>
+              <option value="salt-pepper">Salt & Pepper</option>
+              <option value="blur">Blur</option>
+              <option value="pixelate">Pixelate</option>
+            </select>
+          </div>
+  
+          <div
+            class="control-row"
+            id="extra-filter-control-2"
+            style="display: none"
+          >
+            <label>
+              Filter 2 Intensity
+              <span id="extra-filter-value-2">0</span>
+            </label>
+            <input
+              type="range"
+              id="extra-filter-2"
+              min="0"
+              max="1"
+              value="0"
+              step="0.01"
+            />
+          </div>
+          <!-- End Second Noise Filter Controls -->
+  
 
           <div class="control-row checkbox-row">
             <label> Invert Colors </label>
