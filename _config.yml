@@ -1,0 +1,21 @@
+# DitherDemon GitHub Pages config
+
+# Imposta la directory di base
+baseurl: "/DitherDemon"
+
+# Imposta il branch da utilizzare
+branch: main
+
+# Ignora alcuni file
+exclude:
+  - .github/
+  - .gitattributes
+  - asset-generator.html
+  - "*.md"
+  - LICENSE
+
+# Mantieni la struttura della directory
+keep_files: []
+
+# Nessun plugin richiesto
+plugins: []
