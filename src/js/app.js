@@ -145,47 +145,6 @@ document.addEventListener("DOMContentLoaded", function () {
     }
   });
 
-  // Add touch support for mobile devices
-  let touchTimeout;
-
-  // Detect if we're on a mobile device
-  const isMobile =
-    /Android|webOS|iPhone|iPad|iPod|BlackBerry|IEMobile|Opera Mini/i.test(
-      navigator.userAgent
-    );
-
-  if (isMobile) {
-    // Add mobile-specific UI adjustments
-    const uploadPrompt = document.getElementById("upload-prompt");
-    if (uploadPrompt) {
-      uploadPrompt.innerHTML =
-        '<div class="ascii-art"><pre>DitherDemon</pre></div><p>Tap the Import button to select an image</p>';
-    }
-
-    // Make the upload button more prominent for mobile users
-    const uploadButton = document.getElementById("upload-button");
-    if (uploadButton) {
-      uploadButton.style.fontSize = "1.2rem";
-      uploadButton.style.padding = "12px 20px";
-    }
-  }
-
-  // Add touch file selector for mobile
-  document.addEventListener("DOMContentLoaded", function () {
-    const mobileUploadArea = document.createElement("div");
-    mobileUploadArea.className = "mobile-upload-area";
-    mobileUploadArea.innerHTML = "<p>Tap here to select an image</p>";
-    mobileUploadArea.style.display = isMobile ? "block" : "none";
-
-    if (canvasWrapper && isMobile) {
-      canvasWrapper.appendChild(mobileUploadArea);
-
-      mobileUploadArea.addEventListener("click", function () {
-        imageInput.click();
-      });
-    }
-  });
-
   // UI Updates
   ditheringType.addEventListener("change", function () {
     if (this.value === "bayer") {
