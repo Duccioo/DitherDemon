@@ -71,11 +71,25 @@ document.addEventListener("DOMContentLoaded", function () {
   );
   const secondBorderColor = document.getElementById("second-border-color");
 
+  // Undo/Redo and preset elements
+  const undoButton = document.getElementById("undo-button");
+  const redoButton = document.getElementById("redo-button");
+  const savePresetButton = document.getElementById("save-preset-button");
+  const loadPresetButton = document.getElementById("load-preset-button");
+  const presetSelect = document.getElementById("preset-select");
+  const helpButton = document.getElementById("help-button");
+
   // State variables
   let originalImage = null;
   let originalImageData = null;
   let zoomLevel = 1;
   let panPosition = {x: 0, y: 0};
+
+  // Undo/Redo system
+  const MAX_HISTORY = 20;
+  const historyStack = [];
+  const redoStack = [];
+  let isApplyingHistoryState = false;
 
   // Event Listeners
   uploadButton.addEventListener("click", function () {
@@ -115,7 +129,6 @@ document.addEventListener("DOMContentLoaded", function () {
 
   // UI Updates
   ditheringType.addEventListener("change", function () {
-    // Mostra il controllo della dimensione della matrice solo quando è selezionato il dithering Bayer
     if (this.value === "bayer") {
       bayerMatrixSizeControl.style.display = "flex";
     } else {
@@ -125,7 +138,6 @@ document.addEventListener("DOMContentLoaded", function () {
   });
 
   noiseFilterType.addEventListener("change", function () {
-    // Show or hide the extra filter control based on selection
     const extraFilterControl = document.getElementById("extra-filter-control");
     if (this.value === "none") {
       extraFilterControl.style.display = "none";
@@ -168,8 +180,6 @@ document.addEventListener("DOMContentLoaded", function () {
     applyFilters();
   });
 
-  // Extra filter slider is now handled above
-
   invertColors.addEventListener("change", applyFilters);
 
   // Border controls event listeners
@@ -196,6 +206,34 @@ document.addEventListener("DOMContentLoaded", function () {
   });
 
   secondBorderColor.addEventListener("input", applyFilters);
+
+  // Undo/Redo buttons
+  if (undoButton) {
+    undoButton.addEventListener("click", undoAction);
+    undoButton.classList.add("disabled");
+  }
+
+  if (redoButton) {
+    redoButton.addEventListener("click", redoAction);
+    redoButton.classList.add("disabled");
+  }
+
+  // Preset management
+  if (savePresetButton) {
+    savePresetButton.addEventListener("click", savePreset);
+  }
+
+  if (loadPresetButton) {
+    loadPresetButton.addEventListener("click", loadSelectedPreset);
+  }
+
+  // Help button
+  if (helpButton) {
+    helpButton.addEventListener("click", showHelp);
+  }
+
+  // Load saved presets if exist
+  loadPresets();
 
   // Add panning functionality
   let isDragging = false;
@@ -291,11 +329,26 @@ document.addEventListener("DOMContentLoaded", function () {
         // Enable download button
         downloadButton.classList.remove("disabled");
 
+        // Clear history when loading a new image
+        historyStack.length = 0;
+        redoStack.length = 0;
+        updateUndoRedoButtons();
+
         // Apply filters
         applyFilters();
       };
 
+      img.onerror = function () {
+        showError(
+          "Failed to load image. The file might be corrupted or not supported."
+        );
+      };
+
       img.src = event.target.result;
+    };
+
+    reader.onerror = function () {
+      showError("Failed to read the file. Please try again.");
     };
 
     reader.readAsDataURL(file);
@@ -354,6 +407,11 @@ document.addEventListener("DOMContentLoaded", function () {
 
       // Redraw original image
       ctx.putImageData(originalImageData, 0, 0);
+
+      // Clear history
+      historyStack.length = 0;
+      redoStack.length = 0;
+      updateUndoRedoButtons();
     }
   }
 
@@ -414,7 +472,6 @@ document.addEventListener("DOMContentLoaded", function () {
     if (selectedDitheringType !== "none") {
       const scale = parseFloat(ditheringScale.value);
 
-      // Se è selezionato il dithering Bayer, passa anche la dimensione della matrice
       if (selectedDitheringType === "bayer") {
         const matrixSize = parseInt(bayerMatrixSize.value);
         applyDithering(imageData, selectedDitheringType, scale, matrixSize);
@@ -430,12 +487,235 @@ document.addEventListener("DOMContentLoaded", function () {
         color: borderColor.value,
         doubleBorder: doubleBorder.checked,
         secondThickness: parseInt(secondBorderThickness.value),
-        secondColor: secondBorderColor.value
+        secondColor: secondBorderColor.value,
       };
       applyBorder(imageData, borderOptions);
     }
 
     // Update canvas
     ctx.putImageData(imageData, 0, 0);
+
+    // Save state to history if not currently applying a history state
+    if (!isApplyingHistoryState) {
+      saveToHistory(imageData);
+    }
+  }
+
+  // History management functions
+  function saveToHistory(imageData) {
+    const copyData = new ImageData(
+      new Uint8ClampedArray(imageData.data),
+      imageData.width,
+      imageData.height
+    );
+
+    historyStack.push({
+      imageData: copyData,
+      settings: getCurrentSettings(),
+    });
+
+    if (historyStack.length > MAX_HISTORY) {
+      historyStack.shift();
+    }
+
+    redoStack.length = 0;
+
+    updateUndoRedoButtons();
+  }
+
+  function undoAction() {
+    if (historyStack.length <= 1) return;
+
+    redoStack.push(historyStack.pop());
+
+    if (historyStack.length > 0) {
+      isApplyingHistoryState = true;
+      applyHistoryState(historyStack[historyStack.length - 1]);
+      isApplyingHistoryState = false;
+    }
+
+    updateUndoRedoButtons();
+  }
+
+  function redoAction() {
+    if (redoStack.length === 0) return;
+
+    const state = redoStack.pop();
+
+    isApplyingHistoryState = true;
+    historyStack.push(state);
+    applyHistoryState(state);
+    isApplyingHistoryState = false;
+
+    updateUndoRedoButtons();
+  }
+
+  function applyHistoryState(state) {
+    ctx.putImageData(state.imageData, 0, 0);
+
+    applySettings(state.settings);
+  }
+
+  function updateUndoRedoButtons() {
+    if (undoButton) {
+      if (historyStack.length <= 1) {
+        undoButton.classList.add("disabled");
+      } else {
+        undoButton.classList.remove("disabled");
+      }
+    }
+
+    if (redoButton) {
+      if (redoStack.length === 0) {
+        redoButton.classList.add("disabled");
+      } else {
+        redoButton.classList.remove("disabled");
+      }
+    }
+  }
+
+  // Preset management functions
+  function getCurrentSettings() {
+    return {
+      ditheringType: ditheringType.value,
+      ditheringScale: ditheringScale.value,
+      bayerMatrixSize: bayerMatrixSize.value,
+      contrast: contrast.value,
+      midtone: midtone.value,
+      highlights: highlights.value,
+      luminanceThreshold: luminanceThreshold.value,
+      noiseFilterType: noiseFilterType.value,
+      extraFilter: extraFilter.value,
+      invertColors: invertColors.checked,
+      enableBorder: enableBorder.checked,
+      borderThickness: borderThickness.value,
+      borderColor: borderColor.value,
+      doubleBorder: doubleBorder.checked,
+      secondBorderThickness: secondBorderThickness.value,
+      secondBorderColor: secondBorderColor.value,
+    };
+  }
+
+  function applySettings(settings) {
+    ditheringType.value = settings.ditheringType;
+    ditheringScale.value = settings.ditheringScale;
+    ditheringScaleValue.textContent = settings.ditheringScale;
+    bayerMatrixSize.value = settings.bayerMatrixSize;
+
+    contrast.value = settings.contrast;
+    contrastValue.textContent = `${settings.contrast}%`;
+
+    midtone.value = settings.midtone;
+    midtoneValue.textContent = `${settings.midtone}%`;
+
+    highlights.value = settings.highlights;
+    highlightsValue.textContent = `${settings.highlights}%`;
+
+    luminanceThreshold.value = settings.luminanceThreshold;
+    luminanceThresholdValue.textContent = `${settings.luminanceThreshold}%`;
+
+    noiseFilterType.value = settings.noiseFilterType;
+    extraFilter.value = settings.extraFilter;
+    extraFilterValue.textContent = settings.extraFilter;
+    invertColors.checked = settings.invertColors;
+
+    enableBorder.checked = settings.enableBorder;
+    borderThickness.value = settings.borderThickness;
+    borderThicknessValue.textContent = settings.borderThickness;
+    borderColor.value = settings.borderColor;
+    doubleBorder.checked = settings.doubleBorder;
+    secondBorderThickness.value = settings.secondBorderThickness;
+    secondBorderThicknessValue.textContent = settings.secondBorderThickness;
+    secondBorderColor.value = settings.secondBorderColor;
+
+    if (settings.ditheringType === "bayer") {
+      bayerMatrixSizeControl.style.display = "flex";
+    } else {
+      bayerMatrixSizeControl.style.display = "none";
+    }
+
+    const extraFilterControl = document.getElementById("extra-filter-control");
+    if (settings.noiseFilterType === "none") {
+      extraFilterControl.style.display = "none";
+    } else {
+      extraFilterControl.style.display = "flex";
+    }
+
+    borderControls.style.display = settings.enableBorder ? "block" : "none";
+    secondBorderControls.style.display = settings.doubleBorder
+      ? "block"
+      : "none";
+  }
+
+  function savePreset() {
+    const presetName = prompt("Enter a name for this preset:", "My Preset");
+    if (!presetName) return;
+
+    const preset = {
+      name: presetName,
+      timestamp: Date.now(),
+      settings: getCurrentSettings(),
+    };
+
+    let presets = JSON.parse(
+      localStorage.getItem("ditherdemon_presets") || "[]"
+    );
+
+    presets.push(preset);
+
+    localStorage.setItem("ditherdemon_presets", JSON.stringify(presets));
+
+    loadPresets();
+  }
+
+  function loadPresets() {
+    if (!presetSelect) return;
+
+    while (presetSelect.firstChild) {
+      presetSelect.removeChild(presetSelect.firstChild);
+    }
+
+    const defaultOption = document.createElement("option");
+    defaultOption.value = "";
+    defaultOption.textContent = "Select a preset...";
+    presetSelect.appendChild(defaultOption);
+
+    const presets = JSON.parse(
+      localStorage.getItem("ditherdemon_presets") || "[]"
+    );
+
+    presets.forEach((preset, index) => {
+      const option = document.createElement("option");
+      option.value = index;
+      option.textContent = preset.name;
+      presetSelect.appendChild(option);
+    });
+  }
+
+  function loadSelectedPreset() {
+    if (!presetSelect || presetSelect.value === "") return;
+
+    const presets = JSON.parse(
+      localStorage.getItem("ditherdemon_presets") || "[]"
+    );
+    const preset = presets[presetSelect.value];
+
+    if (preset && preset.settings) {
+      applySettings(preset.settings);
+      applyFilters();
+    }
+  }
+
+  // Help functions
+  function showHelp() {
+    const helpModal = document.getElementById("help-modal");
+    if (helpModal) {
+      helpModal.style.display = "flex";
+    }
+  }
+
+  // Error handling
+  function showError(message) {
+    alert(message);
   }
 });

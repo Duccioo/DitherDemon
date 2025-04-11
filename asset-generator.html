@@ -1,0 +1,186 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>DitherDemon Asset Generator</title>
+    <style>
+        body {
+            font-family: 'JetBrains Mono', monospace, sans-serif;
+            background-color: #0f0f0f;
+            color: #e0e0e0;
+            max-width: 800px;
+            margin: 0 auto;
+            padding: 20px;
+        }
+        h1 {
+            color: #e0e0e0;
+            text-align: center;
+            margin-bottom: 30px;
+        }
+        .asset-container {
+            display: flex;
+            flex-direction: column;
+            gap: 30px;
+            align-items: center;
+        }
+        .asset {
+            background-color: #1a1a1a;
+            padding: 20px;
+            border-radius: 8px;
+            width: 100%;
+            box-shadow: 0 2px 8px rgba(0, 0, 0, 0.2);
+        }
+        .asset-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 20px;
+        }
+        .asset-title {
+            margin: 0;
+            color: #a0a0a0;
+        }
+        .preview {
+            display: flex;
+            justify-content: center;
+            margin: 20px 0;
+        }
+        .preview img, .preview canvas {
+            border: 1px solid #2a2a2a;
+        }
+        .download-btn {
+            background-color: #505050;
+            color: white;
+            border: none;
+            padding: 10px 15px;
+            border-radius: 4px;
+            cursor: pointer;
+            font-family: inherit;
+            transition: all 0.2s;
+        }
+        .download-btn:hover {
+            background-color: #707070;
+            transform: translateY(-1px);
+        }
+        .info {
+            background-color: #1d1d1d;
+            padding: 15px;
+            border-radius: 4px;
+            margin-top: 20px;
+            font-size: 14px;
+            line-height: 1.5;
+            border-left: 2px solid #505050;
+        }
+    </style>
+</head>
+<body>
+    <h1>DitherDemon Asset Generator</h1>
+    
+    <div class="asset-container">
+        <div class="asset">
+            <div class="asset-header">
+                <h2 class="asset-title">Favicon</h2>
+                <button id="download-favicon" class="download-btn">Download</button>
+            </div>
+            <div class="preview">
+                <canvas id="favicon-canvas" width="32" height="32"></canvas>
+            </div>
+            <div class="info">
+                <p>Questa favicon rappresenta il logo di DitherDemon. Dopo il download, posiziona il file nella directory principale del progetto.</p>
+            </div>
+        </div>
+        
+        <div class="asset">
+            <div class="asset-header">
+                <h2 class="asset-title">Immagine Profilo Creatore</h2>
+                <button id="download-profile" class="download-btn">Download</button>
+            </div>
+            <div class="preview">
+                <canvas id="profile-canvas" width="200" height="200"></canvas>
+            </div>
+            <div class="info">
+                <p>Questa è un'immagine segnaposto per il profilo del creatore. Dopo il download, crea una cartella "assets" nella directory del progetto e posiziona l'immagine al suo interno.</p>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        document.addEventListener('DOMContentLoaded', function() {
+            // Genera favicon monocromatica
+            const faviconCanvas = document.getElementById('favicon-canvas');
+            const faviconCtx = faviconCanvas.getContext('2d');
+
+            // Sfondo scuro
+            faviconCtx.fillStyle = '#1a1a1a';
+            faviconCtx.fillRect(0, 0, 32, 32);
+
+            // Pattern di dithering semplice
+            faviconCtx.fillStyle = '#505050';
+            for(let y = 0; y < 32; y += 2) {
+                for(let x = (y % 4 === 0) ? 0 : 2; x < 32; x += 4) {
+                    faviconCtx.fillRect(x, y, 1, 1);
+                }
+            }
+
+            // Aggiungi una "D" in stile dithering
+            faviconCtx.fillStyle = '#e0e0e0';
+            faviconCtx.font = 'bold 18px monospace';
+            faviconCtx.textAlign = 'center';
+            faviconCtx.textBaseline = 'middle';
+            faviconCtx.fillText('D', 16, 16);
+
+            // Genera immagine profilo minimalista
+            const profileCanvas = document.getElementById('profile-canvas');
+            const profileCtx = profileCanvas.getContext('2d');
+
+            // Sfondo con pattern dithering
+            profileCtx.fillStyle = '#1a1a1a';
+            profileCtx.fillRect(0, 0, 200, 200);
+            
+            // Pattern dithering
+            profileCtx.fillStyle = '#303030';
+            for(let y = 0; y < 200; y += 4) {
+                for(let x = (y % 8 === 0) ? 0 : 4; x < 200; x += 8) {
+                    profileCtx.fillRect(x, y, 2, 2);
+                }
+            }
+
+            // Aggiunge bordo circolare
+            profileCtx.strokeStyle = '#505050';
+            profileCtx.lineWidth = 4;
+            profileCtx.beginPath();
+            profileCtx.arc(100, 100, 80, 0, Math.PI * 2);
+            profileCtx.stroke();
+
+            // Aggiungi le iniziali del creatore
+            profileCtx.fillStyle = '#e0e0e0';
+            profileCtx.font = 'bold 60px monospace';
+            profileCtx.textAlign = 'center';
+            profileCtx.textBaseline = 'middle';
+            profileCtx.fillText('DM', 100, 100);
+
+            // Download buttons
+            document.getElementById('download-favicon').addEventListener('click', function() {
+                const dataURL = faviconCanvas.toDataURL('image/png');
+                const link = document.createElement('a');
+                link.href = dataURL;
+                link.download = 'favicon.ico';
+                document.body.appendChild(link);
+                link.click();
+                document.body.removeChild(link);
+            });
+
+            document.getElementById('download-profile').addEventListener('click', function() {
+                const dataURL = profileCanvas.toDataURL('image/jpeg', 0.9);
+                const link = document.createElement('a');
+                link.href = dataURL;
+                link.download = 'creator-profile.jpg';
+                document.body.appendChild(link);
+                link.click();
+                document.body.removeChild(link);
+            });
+        });
+    </script>
+</body>
+</html>
