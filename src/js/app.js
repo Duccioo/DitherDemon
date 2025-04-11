@@ -13,6 +13,24 @@ import {
   applyBorder,
 } from "./imageProcessing.js";
 
+// Funzione di utilità per gestire i percorsi relativi correttamente su GitHub Pages
+function getRelativePath(path) {
+  // Verifica se siamo su GitHub Pages e aggiungiamo il prefisso base se necessario
+  const isGitHubPages = window.location.hostname.includes("github.io");
+  const basePath = isGitHubPages ? "/DitherDemon" : "";
+  return `${basePath}${path}`;
+}
+
+// Quando carichi immagini o altre risorse, usa la funzione getRelativePath
+function loadResource(url) {
+  return new Promise((resolve, reject) => {
+    const img = new Image();
+    img.onload = () => resolve(img);
+    img.onerror = () => reject(new Error(`Failed to load image: ${url}`));
+    img.src = getRelativePath(url);
+  });
+}
+
 document.addEventListener("DOMContentLoaded", function () {
   // DOM Elements
   const canvas = document.getElementById("canvas");
