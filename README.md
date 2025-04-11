@@ -13,50 +13,52 @@
 ░                                           
 ```
 
-Un'applicazione web per trasformare le tue immagini con effetti di dithering artistici. Crea pixel art, immagini retro e design in stile vintage con pochi clic.
+A web application that transforms your images with artistic dithering effects.
 
-## Caratteristiche
+## Try it out live at [DitherDemon](https://duccioo.github.io/DitherDemon/)
 
-- **Molteplici algoritmi di dithering**: Bayer, Floyd-Steinberg, Atkinson, Random e altri
-- **Supporto colore**: Opzioni sia per dithering in bianco e nero che a colori
-- **Regolazioni dell'immagine**: Contrasto, mezzitoni, luci, soglia di luminanza
-- **Filtri di rumore**: Rumore gaussiano, Sale e pepe, Sfocatura, Pixelizzazione
-- **Sistema Undo/Redo**: Torna indietro e ripeti le modifiche facilmente
-- **Salvataggio dei preset**: Salva e carica le tue configurazioni preferite
-- **Personalizzazione bordi**: Aggiungi bordi singoli o doppi alle tue immagini
+## Features
 
-## Come usare
+- **Multiple Dithering Algorithms**: Bayer, Floyd-Steinberg, Atkinson, Random, and more
+- **Color Support**: Options for both black & white and color dithering
+- **Image Adjustments**: Contrast, midtones, highlights, luminance threshold
+- **Noise Filters**: Gaussian noise, Salt & Pepper, Blur, Pixelate
+- **Undo/Redo System**: Easily navigate through your editing history
+- **Preset Management**: Save and load your favorite configurations
+- **Border Customization**: Add single or double borders to your images with custom colors
 
-1. **Importa un'immagine** cliccando sul pulsante "Import" o trascinando un file sull'area di rilascio
-2. **Seleziona uno stile di dithering** dal menu a discesa
-3. **Regola i parametri** utilizzando i cursori per ottenere l'effetto desiderato
-4. **Esporta la tua immagine** cliccando sul pulsante "Export"
+## How to Use
 
-## Scorciatoie da tastiera
+1. **Import an image** by clicking the "Import" button or dragging a file onto the drop area
+2. **Select a dithering style** from the dropdown menu
+3. **Adjust parameters** using the sliders to achieve your desired effect
+4. **Export your image** by clicking the "Export" button
 
-- **Ctrl+Z**: Annulla l'ultima azione
-- **Ctrl+Y**: Ripeti l'ultima azione annullata
-- **+**: Ingrandisci l'immagine
-- **-**: Riduci l'immagine
-- **0**: Reimposta lo zoom
-- **Ctrl+Shift+?**: Mostra la finestra di aiuto
+## Keyboard Shortcuts
 
-## Tecnologie utilizzate
+- **Ctrl+Z**: Undo last action
+- **Ctrl+Y**: Redo last undone action
+- **+**: Zoom in on the image
+- **-**: Zoom out from the image
+- **0**: Reset zoom level
+- **Ctrl+Shift+?**: Show help window
 
-- HTML5 Canvas
-- JavaScript vanilla
-- CSS personalizzato
-- Nessuna dipendenza esterna
+## Technology Stack
 
-## Informazioni sul creatore
+- HTML5 Canvas for rendering
+- Vanilla JavaScript for processing
+- Custom CSS for the user interface
+- No external dependencies
 
-DitherDemon è stato creato da **Duccio Meconcelli**, sviluppatore web e artista digitale con una passione per la pixel art e l'estetica retro.
+## About the Creator
 
-## Licenza
+DitherDemon was created by **Duccio Meconcelli**
 
-Questo progetto è rilasciato sotto licenza MIT.
+## License
+
+This project is released under the MIT License.
 
 ---
 
-_Made with 💜 e un pizzico di magia digitale_
+_Made with 💜 and a touch of digital magic_
 
